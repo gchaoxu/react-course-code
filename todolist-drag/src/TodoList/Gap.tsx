@@ -1,48 +1,45 @@
-import classNames from "classnames";
-import { useEffect, useRef } from "react";
-import { useDrop } from "react-dnd";
-import { useTodoListStore } from "./store";
+import classNames from 'classnames';
+import { useEffect, useRef } from 'react';
+import { useDrop } from 'react-dnd';
+import { useTodoListStore } from './store';
 
 interface GapProps {
-    id?: string
+  id?: string;
 }
 
 export function Gap(props: GapProps) {
+  const { id } = props;
 
-    const {
-        id
-    } = props;
+  const addItem = useTodoListStore((state) => state.addItem);
 
-    const addItem = useTodoListStore(state => state.addItem);
+  const ref = useRef<HTMLDivElement>(null);
 
-    const ref = useRef<HTMLDivElement>(null);
-
-    const [{ isOver }, drop] = useDrop(() => {
+  const [{ isOver }, drop] = useDrop(() => {
+    return {
+      accept: 'new-item',
+      drop() {
+        addItem(
+          {
+            id: Math.random().toString().slice(2, 8),
+            status: 'todo',
+            content: '待办事项',
+          },
+          id
+        );
+      },
+      collect(monitor) {
         return {
-            accept: 'new-item',
-            drop(item) {
-                addItem({
-                    id: Math.random().toString().slice(2, 8),
-                    status: 'todo',
-                    content: '待办事项'
-                }, id);
-            },
-            collect(monitor) {
-                return {
-                    isOver: monitor.isOver()
-                }
-            }
-        }
-    });
+          isOver: monitor.isOver(),
+        };
+      },
+    };
+  });
 
-    useEffect(()=> {
-        drop(ref);
-    }, []);
+  useEffect(() => {
+    drop(ref);
+  }, []);
 
-    const cs = classNames(
-        "h-10",
-        isOver ? 'bg-red-300' : ''
-    );
+  const cs = classNames('h-10', isOver ? 'bg-red-300' : '');
 
-    return <div ref={ref} className={cs}></div>
+  return <div ref={ref} className={cs}></div>;
 }
